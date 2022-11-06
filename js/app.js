@@ -13,13 +13,15 @@ const App = createComponent(({ useState, useView, useEvent, useChildren }) => {
         <div>${state1}</div>
         <div>${state2}</div>
         <div id="counter-a"></div>
+        <div id="counter-c"></div>
         <div id="counter-b"></div>
       </div>
       `;
   });
 
   useChildren(({ attachChild }) => {
-    attachChild(CounterA, '#counter-a');
+    attachChild(CounterA, '#counter-a', { parentState: state1 });
+    attachChild(CounterA, '#counter-c');
     attachChild(CounterB, '#counter-b');
   });
 });

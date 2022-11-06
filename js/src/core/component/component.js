@@ -1,21 +1,28 @@
 export default class Component {
   $states = [];
   $stateKey = 0;
+
   $reducer = null;
   $target = null;
+  $props = null;
 
   $createView = () => {};
   $createEvents = () => {};
   $createChildren = () => {};
 
-  constructor(reducer) {
+  constructor(reducer, target, props) {
     this.$reducer = () => reducer(this.#hooks);
+    this.$target = document.querySelector(target);
+    this.$props = props;
+
     this.$reducer();
+    this.render();
   }
 
   get #hooks() {
     return {
       useState: this.#useState.bind(this),
+      useProps: this.#useProps.bind(this),
       useView: this.#useView.bind(this),
       useEvent: this.#useEvent.bind(this),
       useChildren: this.#useChildren.bind(this),
@@ -44,6 +51,7 @@ export default class Component {
 
       this.$states[stateKey] = newState;
       this.$stateKey = 0;
+
       this.$reducer();
       this.render();
     };
@@ -51,6 +59,10 @@ export default class Component {
     this.$stateKey += 1;
 
     return [state, setState];
+  }
+
+  #useProps() {
+    return this.$props;
   }
 
   #useView(view) {
@@ -70,18 +82,14 @@ export default class Component {
   }
 
   #useChildren(fn) {
-    const attachChild = (child, selector) => {
-      child.render(selector);
+    const attachChild = (child, selector, props) => {
+      child(selector, props);
     };
 
     this.$createChildren = () => fn({ attachChild });
   }
 
-  render(target) {
-    if (target) {
-      this.$target = document.querySelector(target);
-    }
-
+  render() {
     console.log(this.$states);
 
     this.#debounceFrame(() => {
